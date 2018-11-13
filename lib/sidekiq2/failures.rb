@@ -1,20 +1,20 @@
 begin
-  require "sidekiq/web"
+  require "sidekiq2/web"
 rescue LoadError
   # client-only usage
 end
 
-require "sidekiq/api"
-require "sidekiq/version"
-require "sidekiq/failures/version"
-require "sidekiq/failures/sorted_entry"
-require "sidekiq/failures/failure_set"
-require "sidekiq/failures/middleware"
-require "sidekiq/failures/web_extension"
+require "sidekiq2/api"
+require "sidekiq2/version"
+require "sidekiq2/failures/version"
+require "sidekiq2/failures/sorted_entry"
+require "sidekiq2/failures/failure_set"
+require "sidekiq2/failures/middleware"
+require "sidekiq2/failures/web_extension"
 
-module Sidekiq
+module Sidekiq2
 
-  SIDEKIQ_FAILURES_MODES = [:all, :exhausted, :off].freeze
+  SIDEKIQ2_FAILURES_MODES = [:all, :exhausted, :off].freeze
 
   # Sets the default failure tracking mode.
   #
@@ -23,8 +23,8 @@ module Sidekiq
   #
   # Defaults to :all
   def self.failures_default_mode=(mode)
-    unless SIDEKIQ_FAILURES_MODES.include?(mode.to_sym)
-      raise ArgumentError, "Sidekiq#failures_default_mode valid options: #{SIDEKIQ_FAILURES_MODES}"
+    unless SIDEKIQ2_FAILURES_MODES.include?(mode.to_sym)
+      raise ArgumentError, "Sidekiq#failures_default_mode valid options: #{SIDEKIQ2_FAILURES_MODES}"
     end
 
     @failures_default_mode = mode.to_sym
@@ -59,35 +59,35 @@ module Sidekiq
     LIST_KEY = :failed
 
     def self.reset_failures
-      Sidekiq.redis { |c| c.set("stat:failed", 0) }
+      Sidekiq2.redis { |c| c.set("stat:failed", 0) }
     end
 
     def self.count
-      Sidekiq.redis {|r| r.zcard(LIST_KEY) }
+      Sidekiq2.redis {|r| r.zcard(LIST_KEY) }
     end
 
     def self.retry_middleware_class
-      if Gem::Version.new(Sidekiq::VERSION) >= Gem::Version.new('5.0.0')
-        require 'sidekiq/job_retry'
-        Sidekiq::JobRetry
+      if Gem::Version.new(Sidekiq2::VERSION) >= Gem::Version.new('5.0.0')
+        require 'sidekiq2/job_retry'
+        Sidekiq2::JobRetry
       else
-        require 'sidekiq/middleware/server/retry_jobs'
-        Sidekiq::Middleware::Server::RetryJobs
+        require 'sidekiq2/middleware/server/retry_jobs'
+        Sidekiq2::Middleware::Server::RetryJobs
       end
     end
 
   end
 end
 
-Sidekiq.configure_server do |config|
+Sidekiq2.configure_server do |config|
   config.server_middleware do |chain|
-    chain.insert_before Sidekiq::Failures.retry_middleware_class,
-                        Sidekiq::Failures::Middleware
+    chain.insert_before Sidekiq2::Failures.retry_middleware_class,
+                        Sidekiq2::Failures::Middleware
   end
 end
 
-if defined?(Sidekiq::Web)
-  Sidekiq::Web.register Sidekiq::Failures::WebExtension
-  Sidekiq::Web.tabs["Failures"] = "failures"
-  Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "failures/locales")
+if defined?(Sidekiq2::Web)
+  Sidekiq2::Web.register Sidekiq2::Failures::WebExtension
+  Sidekiq2::Web.tabs["Failures"] = "failures"
+  Sidekiq2::Web.settings.locales << File.join(File.dirname(__FILE__), "failures/locales")
 end

@@ -1,24 +1,24 @@
 require "test_helper"
 
-module Sidekiq
+module Sidekiq2
   module Failures
     describe "Middleware" do
       before do
         $invokes = 0
         @boss = MiniTest::Mock.new
         2.times { @boss.expect(:options, {:queues => ['default'] }, []) }
-        @processor = ::Sidekiq::Processor.new(@boss)
-        Sidekiq.server_middleware {|chain| chain.add Sidekiq::Failures::Middleware }
-        Sidekiq.redis = REDIS
-        Sidekiq.redis { |c| c.flushdb }
-        Sidekiq.instance_eval { @failures_default_mode = nil }
+        @processor = ::Sidekiq2::Processor.new(@boss)
+        Sidekiq2.server_middleware {|chain| chain.add Sidekiq2::Failures::Middleware }
+        Sidekiq2.redis = REDIS
+        Sidekiq2.redis { |c| c.flushdb }
+        Sidekiq2.instance_eval { @failures_default_mode = nil }
       end
 
       TestException = Class.new(Exception)
-      ShutdownException = Class.new(Sidekiq::Shutdown)
+      ShutdownException = Class.new(Sidekiq2::Shutdown)
 
       class MockWorker
-        include Sidekiq::Worker
+        include Sidekiq2::Worker
 
         def perform(args)
           $invokes += 1
@@ -29,12 +29,12 @@ module Sidekiq
 
       it 'raises an error when failures_default_mode is configured incorrectly' do
         assert_raises ArgumentError do
-          Sidekiq.failures_default_mode = 'exhaustion'
+          Sidekiq2.failures_default_mode = 'exhaustion'
         end
       end
 
       it 'defaults failures_default_mode to all' do
-        assert_equal :all, Sidekiq.failures_default_mode
+        assert_equal :all, Sidekiq2.failures_default_mode
       end
 
       it 'records all failures by default' do
@@ -108,7 +108,7 @@ module Sidekiq
       end
 
       it "doesn't record failure if going to be retired again and configured to track exhaustion by default" do
-        Sidekiq.failures_default_mode = :exhausted
+        Sidekiq2.failures_default_mode = :exhausted
 
         msg = create_work('class' => MockWorker.to_s, 'args' => ['myarg'], 'retry' => true )
 
@@ -183,7 +183,7 @@ module Sidekiq
        end
 
       it "records failure if retry disabled and configured to track exhaustion by default" do
-        Sidekiq.failures_default_mode = 'exhausted'
+        Sidekiq2.failures_default_mode = 'exhausted'
 
         msg = create_work('class' => MockWorker.to_s, 'args' => ['myarg'], 'retry' => false)
 
@@ -203,7 +203,7 @@ module Sidekiq
       end
 
       it "records failure if failing last retry and configured to track exhaustion by default" do
-        Sidekiq.failures_default_mode = 'exhausted'
+        Sidekiq2.failures_default_mode = 'exhausted'
 
         msg = create_work('class' => MockWorker.to_s, 'args' => ['myarg'], 'retry' => true, 'retry_count' => 25)
 
@@ -223,8 +223,8 @@ module Sidekiq
       end
 
       it "removes old failures when failures_max_count has been reached" do
-        assert_equal 1000, Sidekiq.failures_max_count
-        Sidekiq.failures_max_count = 2
+        assert_equal 1000, Sidekiq2.failures_max_count
+        Sidekiq2.failures_max_count = 2
 
         msg = create_work('class' => MockWorker.to_s, 'args' => ['myarg'])
 
@@ -233,7 +233,7 @@ module Sidekiq
         3.times do
           boss = MiniTest::Mock.new
           2.times { boss.expect(:options, {:queues => ['default'] }, []) }
-          processor = ::Sidekiq::Processor.new(boss)
+          processor = ::Sidekiq2::Processor.new(boss)
 
           actor = MiniTest::Mock.new
           actor.expect(:processor_done, nil, [processor])
@@ -247,17 +247,17 @@ module Sidekiq
 
         assert_equal 2, failures_count
 
-        Sidekiq.failures_max_count = false
-        assert Sidekiq.failures_max_count == false
+        Sidekiq2.failures_max_count = false
+        assert Sidekiq2.failures_max_count == false
 
-        Sidekiq.failures_max_count = nil
-        assert_equal 1000, Sidekiq.failures_max_count
+        Sidekiq2.failures_max_count = nil
+        assert_equal 1000, Sidekiq2.failures_max_count
       end
 
       it 'returns the total number of failed jobs in the queue' do
         msg = create_work('class' => MockWorker.to_s, 'args' => ['myarg'], 'failures' => true)
 
-        assert_equal 0, Sidekiq::Failures.count
+        assert_equal 0, Sidekiq2::Failures.count
 
         actor = MiniTest::Mock.new
         actor.expect(:processor_done, nil, [@processor])
@@ -268,15 +268,15 @@ module Sidekiq
           @processor.process(msg)
         end
 
-        assert_equal 1, Sidekiq::Failures.count
+        assert_equal 1, Sidekiq2::Failures.count
       end
 
       def failures_count
-        Sidekiq.redis { |conn| conn.zcard(LIST_KEY) }
+        Sidekiq2.redis { |conn| conn.zcard(LIST_KEY) }
       end
 
       def create_work(msg)
-        Sidekiq::BasicFetch::UnitOfWork.new('default', Sidekiq.dump_json(msg))
+        Sidekiq2::BasicFetch::UnitOfWork.new('default', Sidekiq2.dump_json(msg))
       end
     end
   end

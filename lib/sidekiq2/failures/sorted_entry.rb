@@ -1,4 +1,4 @@
-module Sidekiq
+module Sidekiq2
   class SortedEntry
     alias_method :super_initialize, :initialize
 
@@ -10,12 +10,12 @@ module Sidekiq
     end
 
     def retry_failure
-      Sidekiq.redis do |conn|
-        results = conn.zrangebyscore(Sidekiq::Failures::LIST_KEY, score, score)
-        conn.zremrangebyscore(Sidekiq::Failures::LIST_KEY, score, score)
+      Sidekiq2.redis do |conn|
+        results = conn.zrangebyscore(Sidekiq2::Failures::LIST_KEY, score, score)
+        conn.zremrangebyscore(Sidekiq2::Failures::LIST_KEY, score, score)
         results.map do |message|
-          msg = Sidekiq.load_json(message)
-          Sidekiq::Client.push(msg)
+          msg = Sidekiq2.load_json(message)
+          Sidekiq2::Client.push(msg)
         end
       end
     end

@@ -1,18 +1,18 @@
-# Sidekiq::Failures [![Build Status](https://secure.travis-ci.org/mhfs/sidekiq-failures.png)](http://travis-ci.org/mhfs/sidekiq-failures)
+# Sidekiq2::Failures [![Build Status](https://secure.travis-ci.org/mhfs/sidekiq2-failures.png)](http://travis-ci.org/mhfs/sidekiq2-failures)
 
 Keeps track of Sidekiq failed jobs and adds a tab to the Web UI to let you browse
 them. Makes use of Sidekiq's custom tabs and middleware chain.
 
 It mimics the way Resque keeps track of failures.
 
-WARNING: by default sidekiq-failures will keep up to 1000 failures. See [Maximum Tracked Failures](https://github.com/mhfs/sidekiq-failures#maximum-tracked-failures) below.
+WARNING: by default sidekiq2-failures will keep up to 1000 failures. See [Maximum Tracked Failures](https://github.com/mhfs/sidekiq2-failures#maximum-tracked-failures) below.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sidekiq-failures'
+gem 'sidekiq2-failures'
 ```
 
 ## Usage
@@ -28,12 +28,12 @@ Since each failed job/retry creates a new failure entry that will only be remove
 by you manually, your failures list might consume more resources than you have
 available.
 
-To avoid this sidekiq-failures adopts a default of 1000 maximum tracked failures.
+To avoid this sidekiq2-failures adopts a default of 1000 maximum tracked failures.
 
 To change the maximum amount:
 
 ```ruby
-Sidekiq.configure_server do |config|
+Sidekiq2.configure_server do |config|
   config.failures_max_count = 5000
 end
 ```
@@ -41,14 +41,14 @@ end
 To disable the limit entirely:
 
 ```ruby
-Sidekiq.configure_server do |config|
+Sidekiq2.configure_server do |config|
   config.failures_max_count = false
 end
 ```
 
 ### Failures Tracking Mode
 
-Sidekiq-failures offers three failures tracking options (per worker):
+Sidekiq2-failures offers three failures tracking options (per worker):
 
 
 #### :all (default)
@@ -61,7 +61,7 @@ This is the default behavior but can be made explicit with:
 
 ```ruby
 class MyWorker
-  include Sidekiq::Worker
+  include Sidekiq2::Worker
 
   sidekiq_options :failures => true # or :all
 
@@ -78,7 +78,7 @@ You can set this mode as follows:
 
 ```ruby
 class MyWorker
-  include Sidekiq::Worker
+  include Sidekiq2::Worker
 
   sidekiq_options :failures => :exhausted
 
@@ -92,7 +92,7 @@ You can also completely turn off failures tracking for a given worker as follows
 
 ```ruby
 class MyWorker
-  include Sidekiq::Worker
+  include Sidekiq2::Worker
 
   sidekiq_options :failures => false # or :off
 
@@ -106,7 +106,7 @@ You can also change the default of all your workers at once by setting the follo
 server config:
 
 ```ruby
-Sidekiq.configure_server do |config|
+Sidekiq2.configure_server do |config|
   config.failures_default_mode = :off
 end
 ```
@@ -122,7 +122,7 @@ different from `Sidekiq` built in failed stat. Also, notice that this might be
 influenced by `failures_max_count`.
 
 ```ruby
-Sidekiq::Failures.count
+Sidekiq2::Failures.count
 ```
 
 ### Reset Failures
@@ -131,7 +131,7 @@ Gives a convenient way of reseting Sidekiq Failure stored failed jobs programmat
 Takes an options hash and if the `counter` key is present also resets Sidekiq own failed stats.
 
 ```ruby
-Sidekiq::Failures.reset_failures
+Sidekiq2::Failures.reset_failures
 ```
 
 ## Dependencies
@@ -150,4 +150,4 @@ Depends on Sidekiq >= 4.0.0
 
 Released under the MIT License. See the [LICENSE][license] file for further details.
 
-[license]: https://github.com/mhfs/sidekiq-failures/blob/master/LICENSE
+[license]: https://github.com/mhfs/sidekiq2-failures/blob/master/LICENSE

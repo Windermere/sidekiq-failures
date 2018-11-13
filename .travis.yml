@@ -13,9 +13,9 @@ rvm:
   - 2.4.0
 env:
   matrix:
-    - SIDEKIQ_VERSION="~> 4.0"
-    - SIDEKIQ_VERSION="~> 4.2"
-    - SIDEKIQ_VERSION="~> 5.0"
+    - SIDEKIQ2_VERSION="~> 4.0"
+    - SIDEKIQ2_VERSION="~> 4.2"
+    - SIDEKIQ2_VERSION="~> 5.0"
 matrix:
   allow_failures:
     - rvm: jruby-9.1.6.0 

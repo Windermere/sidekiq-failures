@@ -1,4 +1,4 @@
-module Sidekiq
+module Sidekiq2
   module Failures
 
     class Middleware
@@ -7,7 +7,7 @@ module Sidekiq
       def call(worker, msg, queue)
         self.msg = msg
         yield
-      rescue Sidekiq::Shutdown
+      rescue Sidekiq2::Shutdown
         raise
       rescue Exception => e
         raise e if skip_failure?
@@ -25,11 +25,11 @@ module Sidekiq
           msg['error_backtrace'] = e.backtrace[0..msg['backtrace'].to_i]
         end
 
-        payload = Sidekiq.dump_json(msg)
-        Sidekiq.redis do |conn|
+        payload = Sidekiq2.dump_json(msg)
+        Sidekiq2.redis do |conn|
           conn.zadd(LIST_KEY, Time.now.utc.to_f, payload)
-          unless Sidekiq.failures_max_count == false
-            conn.zremrangebyrank(LIST_KEY, 0, -(Sidekiq.failures_max_count + 1))
+          unless Sidekiq2.failures_max_count == false
+            conn.zremrangebyrank(LIST_KEY, 0, -(Sidekiq2.failures_max_count + 1))
           end
         end
 
@@ -59,7 +59,7 @@ module Sidekiq
         when 'exhausted'
           :exhausted
         else
-          Sidekiq.failures_default_mode
+          Sidekiq2.failures_default_mode
         end
       end
 
@@ -81,11 +81,11 @@ module Sidekiq
 
       def retry_middleware
         @retry_middleware ||=
-          Sidekiq::Failures.retry_middleware_class.new
+          Sidekiq2::Failures.retry_middleware_class.new
       end
 
       def default_max_retries
-        Sidekiq::Failures.retry_middleware_class::DEFAULT_MAX_RETRY_ATTEMPTS
+        Sidekiq2::Failures.retry_middleware_class::DEFAULT_MAX_RETRY_ATTEMPTS
       end
 
       def hostname

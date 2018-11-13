@@ -7,11 +7,11 @@ require "minitest/mock"
 require "rack/test"
 
 require "sidekiq"
-require "sidekiq-failures"
-require "sidekiq/processor"
-require "sidekiq/fetch"
-require "sidekiq/cli"
+require "sidekiq2-failures"
+require "sidekiq2/processor"
+require "sidekiq2/fetch"
+require "sidekiq2/cli"
 
-Sidekiq.logger.level = Logger::ERROR
+Sidekiq2.logger.level = Logger::ERROR
 
-REDIS = Sidekiq::RedisConnection.create(url: "redis://localhost/15")
+REDIS = Sidekiq2::RedisConnection.create(url: "redis://localhost/15")
