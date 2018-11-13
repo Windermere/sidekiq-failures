@@ -38,15 +38,15 @@
   * Introduce delete(all) / retry(all) (@spectator)
   * Fix Sidekiq 3 compatibility (@petergoldstein)
   * Sidekiq 3 compatibility cleanup (@spectator)
-  * Explicitly require sidekiq/api (@krasnoukhov)
+  * Explicitly require sidekiq1/api (@krasnoukhov)
 
 ## 0.3.0
 
   * Bump sidekiq dependency to sidekiq >= 2.14.0
   * Remove slim templates and dependecy
   * Escape exception info when outputing to html
-  * Add `Sidekiq::Failures.reset_failures` helper method
-  * Add `Sidekiq::Failures.count` helper method (@zanker)
+  * Add `Sidekiq1::Failures.reset_failures` helper method
+  * Add `Sidekiq1::Failures.count` helper method (@zanker)
   * Adhere to sidekiq approach of showing UTC times
   * Catch all exceptions, not just those that inherit from StandardError (@tylerkovacs)
   * Fix private method call (@bwthomas)
@@ -65,7 +65,7 @@
 ## 0.2.0
 
   * Added processor identity to failure data (@krasnoukhov)
-  * Handle Sidekiq::Shutdown exceptions (@krasnoukhov)
+  * Handle Sidekiq1::Shutdown exceptions (@krasnoukhov)
   * Add failures maximum count option (@mathieulaporte)
   * User Expception#message instead of Exception#to_s (@supaspoida)
   * Removed web depencies (@LongMan)
@@ -75,7 +75,7 @@
 
   * Allow per worker configuration of failure tracking mode. Thanks to
     @kbaum for most of the work.
-  * Prevent sidekiq-failures from loading up sidekiq/processor (and thus
+  * Prevent sidekiq1-failures from loading up sidekiq1/processor (and thus
     Celluloid actors) except for inside a Sidekiq server context (@cheald)
   * Fix pagination bug
   * Add failures default mode option (@kbaum)

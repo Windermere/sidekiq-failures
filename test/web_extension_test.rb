@@ -1,28 +1,28 @@
 require "test_helper"
-require "sidekiq/web"
+require "sidekiq1/web"
 
-module Sidekiq
+module Sidekiq1
   describe "WebExtension" do
     include Rack::Test::Methods
 
     TOKEN = rand(2**128-1).freeze
 
     def app
-      Sidekiq::Web
+      Sidekiq1::Web
     end
 
     before do
       env 'rack.session', { csrf: TOKEN }
       env 'HTTP_X_CSRF_TOKEN', TOKEN
-      Sidekiq.redis = REDIS
-      Sidekiq.redis {|c| c.flushdb }
+      Sidekiq1redis = REDIS
+      Sidekiq1redis {|c| c.flushdb }
     end
 
     it 'can display home with failures tab' do
       get '/'
 
       last_response.status.must_equal 200
-      last_response.body.must_match(/Sidekiq/)
+      last_response.body.must_match(/Sidekiq1/)
       last_response.body.must_match(/Failures/)
     end
 
@@ -181,7 +181,7 @@ module Sidekiq
         last_response.location.must_match(/failures/)
       end
 
-      if defined? Sidekiq::Pro
+      if defined? Sidekiq1::Pro
         it 'can filter failure' do
           create_sample_failure
           post '/filter/failures', substr: 'new'
@@ -245,16 +245,16 @@ module Sidekiq
         :error_backtrace => ["path/file1.rb", "path/file2.rb"]
       }.merge(data)
 
-      Sidekiq.redis do |c|
+      Sidekiq1redis do |c|
         c.multi do
-          c.zadd(Sidekiq::Failures::LIST_KEY, failure_score, Sidekiq.dump_json(data))
+          c.zadd(Sidekiq1::Failures::LIST_KEY, failure_score, Sidekiq1dump_json(data))
           c.set("stat:failed", 1)
         end
       end
     end
 
     def failed_count
-      Sidekiq.redis { |c| c.get("stat:failed") }
+      Sidekiq1redis { |c| c.get("stat:failed") }
     end
 
     def failure_score

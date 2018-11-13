@@ -1,10 +1,10 @@
-module Sidekiq
+module Sidekiq1
   module Failures
     Superclass =
-      if defined?(Sidekiq::JobSet)
-        Sidekiq::JobSet
+      if defined?(Sidekiq1::JobSet)
+        Sidekiq1::JobSet
       else
-        Sidekiq::SortedSet
+        Sidekiq1::SortedSet
       end
 
     class FailureSet < Superclass

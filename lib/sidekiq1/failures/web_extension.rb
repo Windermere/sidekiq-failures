@@ -1,4 +1,4 @@
-module Sidekiq
+module Sidekiq1
   module Failures
     module WebExtension
 
@@ -20,7 +20,7 @@ module Sidekiq
         app.get "/failures" do
           @count = (params[:count] || 25).to_i
           (@current_page, @total_size, @failures) = page(LIST_KEY, params[:page], @count, :reverse => true)
-          @failures = @failures.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+          @failures = @failures.map {|msg, score| Sidekiq1::SortedEntry.new(nil, score, msg) }
 
           render(:erb, File.read(File.join(view_path, "failures.erb")))
         end
@@ -65,7 +65,7 @@ module Sidekiq
         end
 
         app.post "/failures/all/reset" do
-          Sidekiq::Failures.reset_failures
+          Sidekiq1::Failures.reset_failures
           redirect "#{root_path}failures"
         end
 
@@ -84,7 +84,7 @@ module Sidekiq
         end
 
         app.post '/filter/failures' do
-          @failures = Sidekiq::Failures::FailureSet.new.scan("*#{params[:substr]}*")
+          @failures = Sidekiq1::Failures::FailureSet.new.scan("*#{params[:substr]}*")
           @current_page = 1
           @count = @total_size = @failures.size
           render(:erb, File.read(File.join(view_path, "failures.erb")))
